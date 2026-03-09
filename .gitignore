@@ -28,7 +28,7 @@ PRIVATE-NOTES.md
 # === VS Code (special case) ===
 
 # WHY: Ignore editor state while allowing a shared baseline configuration.
-.vscode/
+#.vscode/
 
 # WHY: Commit recommended extensions (opt-in) for consistent development experience.
 # NOTE: Share recommendations, not personal editor styles or preferences.
