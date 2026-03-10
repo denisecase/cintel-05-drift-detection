@@ -13,7 +13,7 @@ version = "0.1.0"
 dependencies = [
     # REQ.DEPS: External packages used by the project code.
     "datafun-toolkit",
-    "polars",
+    "polars[rtcompat]",
 ]
 
 [project.optional-dependencies]
