@@ -118,3 +118,7 @@ helping analysts identify when system behavior begins to change.
 If you would like to apply these skills to a real dataset instead of the provided example data, see suggested datasets:
 
 https://denisecase.github.io/pro-analytics-02/reference/datasets/cintel/
+
+---
+
+[◄ Back to 🏠 Home](index.md)

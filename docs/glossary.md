@@ -33,7 +33,7 @@ The process of comparing summary statistics between two time periods.
 Baseline comparisons help analysts identify potential changes in system behavior.
 Example:
 
-```
+```text
 reference_avg_latency
 current_avg_latency
 difference = current - reference
@@ -73,3 +73,7 @@ Common examples include:
 - minimum
 - maximum
 - count
+
+---
+
+[◄ Back to 🏠 Home](index.md)
