@@ -1,8 +1,5 @@
 """
-case_drift_detector.py - Project script (example).
-
-Author: Denise Case
-Date: 2026-03
+drift_detector.py - Project script (example).
 
 Reference and Current System Metrics Data
 
@@ -39,7 +36,7 @@ Paths (relative to repo root)
 
 Terminal command to run this file from the root project folder
 
-    uv run python -m cintel.case_drift_detector
+    uv run python -m cintel.drift_detector
 
 OBS:
   Don't edit this file - it should remain a working example.
@@ -53,8 +50,8 @@ import logging
 from pathlib import Path
 from typing import Final
 
-import polars as pl
 from datafun_toolkit.logger import get_logger, log_header, log_path
+import polars as pl
 
 # === CONFIGURE LOGGER ===
 

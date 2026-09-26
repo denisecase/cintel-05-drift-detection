@@ -7,9 +7,9 @@ Follow the instructions in
 
 Complete:
 
-1. Phase 1. **Start & Run** – copy the project and confirm it runs
-2. Phase 2. **Change Authorship** – update the project to your name and GitHub account
-3. Phase 3. **Read & Understand** – review the project structure and code
+1. Phase 1. **Start & Run**
+2. Phase 2. **Read & Understand**
+3. Phase 3. **Take Ownership**
 
 ## FRIDAY/SUNDAY: Complete Workflow Phases 4-5
 
@@ -18,7 +18,7 @@ Complete:
 1. Phase 4. **Make a Technical Modification**
 2. Phase 5. **Apply the Skills to a New Problem**
 
-# Topic
+## Topic
 
 Drift detection for monitoring changes in system behavior.
 
@@ -26,7 +26,7 @@ In this project, you compare **recent system behavior** with a **baseline refere
 
 Drift detection helps analysts determine when a system is behaving differently than expected.
 
-# Learning Objectives
+## Learning Objectives
 
 After completing this project, you should be able to:
 
@@ -36,11 +36,11 @@ After completing this project, you should be able to:
 - Run and validate a professional Python project
 - Interpret evidence that suggests system behavior has changed
 
-# Example Code
+## Example Code
 
 The example file is located in:
 
-```
+```text
 src/cintel/drift_detector_case.py
 ```
 
@@ -55,7 +55,7 @@ It demonstrates:
 
 Run the example and review the code before creating your own version.
 
-# Dataset
+## Dataset
 
 The example datasets are located in the `data/` folder.
 
@@ -70,7 +70,7 @@ The **current dataset** represents more recent system activity.
 
 Drift detection compares these two periods to determine whether the system has changed.
 
-# Your Phase 4: Technical Modification Task
+## Your Phase 4: Technical Modification Task
 
 Using the example as a guide:
 
@@ -94,7 +94,7 @@ Then:
 
 The goal of this phase is to practice modifying a working drift detection pipeline.
 
-# Phase 5: Apply the Skills
+## Phase 5: Apply the Skills
 
 In Phase 5 you apply drift detection to a new situation.
 

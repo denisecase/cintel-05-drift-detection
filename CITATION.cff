@@ -9,9 +9,10 @@
 # USAGE: See https://citation-file-format.github.io/ for details.
 
 cff-version: "1.2.0"
+message: "If using this project, please cite it as described in this file."
 type: software
 
-title: Continuous Intelligence 05 Drift Detection
+title: cintel-05-drift-detection
 date-released: "2026-03-06"
 
 authors:
@@ -29,23 +30,17 @@ abstract: |
   Demonstrates professional Python project structure and workflows.
 
 keywords:
-  # identity
   - data analytics
   - continuous intelligence
   - drift detection
-
-  # practices
   - professional workflows
   - reproducible workflows
   - software quality
-
-  # tools and ecosystem
-  - python
   - git
   - github
-  - pre-commit
-  - uv
+  - prek
+  - python
   - ruff
+  - ty
+  - uv
   - zensical
-
-message: "If using this project, please cite it as described in this file."
