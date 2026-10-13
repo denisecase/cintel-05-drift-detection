@@ -5,8 +5,8 @@ Every function below is a marimo cell.
 
 RUN LOCALLY:
 
-  uv run marimo edit app.py     # edit
-  uv run marimo run  app.py     # run as an app (CTRL+c quits)
+  uv run marimo edit src/cintel/app.py     # edit
+  uv run marimo run  src/cintel/app.py     # run as an app (CTRL+c quits)
 
 WASM DEPENDENCIES:
 
@@ -58,9 +58,10 @@ async def _():
     import marimo as mo
     import polars as pl
 
+    from cintel.utils_stats import compare_error_rates
     from cintel.utils_system import compute_drift_summary, load_system_metrics
 
-    return compute_drift_summary, load_system_metrics, mo, pl, sys
+    return compare_error_rates, compute_drift_summary, load_system_metrics, mo, pl, sys
 
 
 # === TITLE AND INTRODUCTION ===
@@ -175,6 +176,38 @@ def _(
         latency_threshold=latency_threshold.value,
     )
     return (drift_df,)
+
+
+# === COMPUTE STATISTICAL COMPARISON ===
+
+
+@app.cell
+def _(compare_error_rates, current_df, reference_df):
+    stats_df = compare_error_rates(reference_df, current_df)
+    return (stats_df,)
+
+
+# === SHOW STATISTICAL RESULTS ===
+
+
+@app.cell
+def _(mo):
+    mo.md("""
+    ## Statistical Comparison
+
+    Compare mean error rates between reference and current observations.
+
+    The permutation-test p-value provides statistical evidence
+    of a difference under the test assumptions.
+
+    Statistical significance does not establish persistent drift
+    or operational importance.
+    """)
+
+
+@app.cell
+def _(mo, stats_df):
+    mo.ui.table(stats_df)
 
 
 # === SHOW THE RESULTS ===

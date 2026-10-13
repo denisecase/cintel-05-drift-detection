@@ -68,6 +68,7 @@ from typing import Final
 from datafun_toolkit.logger import get_logger, log_header, log_path
 import polars as pl
 
+from cintel.utils_stats import compare_error_rates
 from cintel.utils_system import compute_drift_summary, load_system_metrics
 
 # === CONFIGURE LOGGER ===
@@ -84,6 +85,7 @@ REFERENCE_FILE: Final[Path] = DATA_DIR / "reference_metrics.csv"
 CURRENT_FILE: Final[Path] = DATA_DIR / "current_metrics.csv"
 
 OUTPUT_FILE: Final[Path] = ARTIFACTS_DIR / "drift_summary.csv"
+OUTPUT_STATS_FILE: Final[Path] = ARTIFACTS_DIR / "drift_stats.csv"
 SUMMARY_LONG_FILE: Final[Path] = ARTIFACTS_DIR / "drift_summary_long.csv"
 
 # === DEFINE THRESHOLDS ===
@@ -159,7 +161,21 @@ def main() -> None:
     LOG.info("Calculated summary differences and drift flags")
 
     # ----------------------------------------------------
-    # STEP 3: SAVE THE FLAT DRIFT SUMMARY AS AN ARTIFACT
+    # STEP 3: STATISTICAL COMPARISON OF ERROR RATES
+    # ----------------------------------------------------
+    stats_df: pl.DataFrame = compare_error_rates(
+        reference_df,
+        current_df,
+    )
+
+    stats_df.write_csv(OUTPUT_STATS_FILE)
+
+    LOG.info("Statistical comparison of error rates:")
+    LOG.info(stats_df)
+    log_path(LOG, "STATS_FILE", OUTPUT_STATS_FILE)
+
+    # ----------------------------------------------------
+    # STEP 4: SAVE THE FLAT DRIFT SUMMARY AS AN ARTIFACT
     # ----------------------------------------------------
     drift_df.write_csv(OUTPUT_FILE)
     LOG.info(f"Wrote drift summary file: {OUTPUT_FILE}")
@@ -172,7 +188,7 @@ def main() -> None:
     LOG.info("All remaining steps are about creating a nicer display.")
 
     # ----------------------------------------------------
-    # OPTIONAL STEP 3.1: LOG THE SUMMARY ONE FIELD PER LINE
+    # OPTIONAL STEP 4.1: LOG THE SUMMARY ONE FIELD PER LINE
     # ----------------------------------------------------
     # drift_df has one row with many columns.
     # Convert that one row to a dictionary so we can log:
@@ -197,7 +213,7 @@ def main() -> None:
         LOG.info(f"{field_name}: {field_value}")
 
     # ----------------------------------------------------
-    # OPTIONAL STEP 4: CREATE A LONG-FORM ARTIFACT FOR DISPLAY
+    # OPTIONAL STEP 4.2: CREATE A LONG-FORM ARTIFACT FOR DISPLAY
     # ----------------------------------------------------
     # Create a second artifact with one field per row.
     # This is easier to read than a single very wide row.
@@ -212,7 +228,7 @@ def main() -> None:
         }
     )
     # ----------------------------------------------------
-    # OPTIONAL STEP 4.1: SAVE THE LONG-FORM DRIFT SUMMARY AS AN ARTIFACT
+    # OPTIONAL STEP 4.3: SAVE THE LONG-FORM DRIFT SUMMARY AS AN ARTIFACT
     # ----------------------------------------------------
     drift_summary_long_df.write_csv(SUMMARY_LONG_FILE)
     LOG.info(f"Wrote long summary file: {SUMMARY_LONG_FILE}")

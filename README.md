@@ -68,6 +68,15 @@ From a VS Code terminal in the project root:
 uv run python -m cintel.drift_detector
 ```
 
+## Run the Reactive App
+
+From a VS Code terminal in the project root
+(hit CTRL + c to quit):
+
+```shell
+uv run marimo run  src/cintel/app.py
+```
+
 ## Results
 
 The pipeline produces:

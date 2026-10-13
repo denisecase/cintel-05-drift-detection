@@ -118,10 +118,3 @@ features = [
 #   docs/api.md         - API reference generated from Python docstrings
 #
 # Add or organize Markdown files in docs/ to update the website navigation.
-
-nav = [
-    { "Home" = "index.md" },
-    { "Project Instructions" = "project-instructions.md" },
-    { "Your Files" = "your-files.md" },
-    { "Glossary" = "glossary.md" },
-]
