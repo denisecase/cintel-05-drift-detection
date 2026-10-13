@@ -1,21 +1,97 @@
-# 🏠 Continuous Intelligence Project Documentation
+# Detecting Changes in System Behavior
 
-> Use this hosted documentation site to tell your
-> data story. Include a narrative telling your
-> results, observations, and interpretations.
-> Display visuals as needed for a compelling story.
+Continuous Intelligence | Project 05 | Example Report
 
-## Professional Workflow
+## Overview
 
-See [**Workflow B: Apply Example Project**](https://denisecase.github.io/pro-analytics-02/workflow-b-apply-example-project/)
-to get a project like this running on your machine.
+This project examines whether recent system behavior
+differs meaningfully from an earlier reference period.
 
-## Professional Projects
+The objective is to detect changes in operational metrics
+that may indicate a need for investigation.
 
-- We code like the pros to help us **focus on the analytics**.
-- Most files in this repository will never be touched.
-- If curious about a file, check out the
-  [Professional Python Project Explainer](https://denisecase.github.io/professional-python-project-explainer/).
+## Data
+
+Two datasets represent different observation periods:
+
+- Reference data representing earlier behavior.
+- Current data representing more recent behavior.
+
+Each contains measurements of requests,
+errors, and total latency.
+
+[View Reference Data](https://github.com/denisecase/cintel-05-drift-detection/blob/main/data/reference_metrics_case.csv)
+
+[View Current Data](https://github.com/denisecase/cintel-05-drift-detection/blob/main/data/current_metrics_case.csv)
+
+## Methods
+
+The pipeline calculates the mean of each metric
+for both observation periods.
+
+It then calculates:
+
+    difference = current_mean - reference_mean
+
+Drift is flagged when the absolute difference
+exceeds the configured threshold.
+
+The example thresholds are:
+
+- Requests: 20.
+- Errors: 2.
+- Total latency: 1,000 milliseconds.
+
+These thresholds are illustrative and should
+be justified for a production monitoring system.
+
+## Results
+
+| Metric             | Reference Mean | Current Mean | Difference |
+| ------------------ | -------------: | -----------: | ---------: |
+| Requests           |          128.3 |        164.5 |      +36.2 |
+| Errors             |            2.3 |          6.3 |       +4.0 |
+| Total latency (ms) |          3,835 |        5,670 |     +1,835 |
+
+**All three metrics exceeded their configured thresholds.**
+
+[View Drift Results](https://github.com/denisecase/cintel-05-drift-detection/blob/main/artifacts/drift_summary_case.csv)
+
+[View Detailed Summary](https://github.com/denisecase/cintel-05-drift-detection/blob/main/artifacts/drift_summary_long_case.csv)
+
+## Interpretation
+
+The current period shows higher average request volume,
+higher average errors, and greater total latency.
+
+These changes suggest that the system is operating
+differently from its reference behavior.
+
+An analyst could investigate whether the changes
+reflect increased workload, changing demand,
+or a potential performance problem.
+
+## Limitations
+
+The approach compares means using fixed thresholds.
+
+It does not account for variability,
+statistical significance, or seasonal patterns.
+
+Higher request volume may also explain part
+of the increase in errors and total latency.
+
+Additional normalized signals, such as error rate
+and average latency per request, would help
+distinguish workload changes from degraded performance.
+
+## Conclusion
+
+Baseline comparisons provide a practical starting point
+for detecting changes in operational behavior.
+
+Drift indicators are evidence for investigation,
+not proof that a system is malfunctioning.
 
 ## Documentation Index
 
@@ -25,22 +101,15 @@ to get a project like this running on your machine.
 - [**API**](api.md)
 - [**Reactive App**](./app/index.html)
 
-## How To Set Up This Project Documentation
+## Project Links
 
-Go to your GitHub repository / (More) / Settings / Pages /
-Build and deployment Source = GitHub Actions.
+- [GitHub Repository](https://github.com/denisecase/cintel-05-drift-detection)
+- [Example Pipeline](https://github.com/denisecase/cintel-05-drift-detection/blob/main/src/cintel/drift_detector.py)
+- [Results and Artifacts](https://github.com/denisecase/cintel-05-drift-detection/tree/main/artifacts)
 
-We have a helper at `.github/workflows/deploy-zensical.yml` that will
-automagically deploy these documents to a hosted
-project documentation web site.
+## Project Resources
 
-When viewing your GitHub repository **Code** tab,
-click the gear icon in the **About** section on the right
-to provide a short description, check the box to use your
-Pages documentation site, and configure some keywords.
-
-Professional communication is a valuable skill.
-
-## Additional Resources
-
+- [Project Instructions](project-instructions.md)
+- [Professional Python Guide](https://denisecase.github.io/pro-analytics-02/)
+- [Professional Python Project Explainer](https://pup-pack.github.io/professional-python-project-explainer/).
 - [Suggested Datasets](https://denisecase.github.io/pro-analytics-02/reference/datasets/cintel/)

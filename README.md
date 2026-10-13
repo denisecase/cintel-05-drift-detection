@@ -1,87 +1,85 @@
 # cintel-05-drift-detection
 
 [![Python 3.14](https://img.shields.io/badge/python-3.14%2B-blue?logo=python)](pyproject.toml)
-[![MIT](https://img.shields.io/badge/license-see%20LICENSE-yellow.svg)](./LICENSE)
+[![CI](https://github.com/denisecase/cintel-05-drift-detection/actions/workflows/ci-python-zensical.yml/badge.svg)](https://github.com/denisecase/cintel-05-drift-detection/actions/workflows/ci-python-zensical.yml)
+[![Documentation](https://img.shields.io/badge/docs-site-blue?logo=github)](https://denisecase.github.io/cintel-05-drift-detection/)
 
-> Professional Python project for continuous intelligence.
+[![uv managed](https://img.shields.io/badge/uv-managed-DE5FE9)](https://docs.astral.sh/uv/)
+[![ty type checked](https://img.shields.io/badge/ty-type_checked-2F80ED)](https://docs.astral.sh/ty/)
+[![Zensical docs](https://img.shields.io/badge/Zensical-docs-purple)](https://zensical.org/)
+[![MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 
-Continuous intelligence systems monitor data streams, detect change, and respond in real time.
-This course builds those capabilities through working projects.
+> Detect changes in system behavior by comparing current and reference data.
 
-In the age of generative AI, durable skills are grounded in real work:
-setting up a professional environment,
-reading and running code,
-understanding the logic,
-and pushing work to a shared repository.
-Each project follows the structure of professional Python projects.
-We learn by doing.
+## Project Overview
 
-## This Project
+Author: Denise Case
 
-This project introduces **drift detection**.
+Date: 2026 October
 
-In practice, drift detection often begins with **baseline comparison**,
-comparing **current** system behavior to an **earlier reference period**.
+This project introduces drift detection.
 
-The goal is to copy this repository,
-set up your environment,
-run the example analysis,
-and explore how system behavior can change
-between an earlier **reference period**
-and a more recent **current period**.
+The goal is to compare current measurements against a reference period
+and identify changes that exceed defined thresholds.
 
-Run the example pipeline, read the code,
-and make small modifications to understand:
-
-- how average metrics are compared
-- how baseline differences can indicate system change
-- how simple drift flags can be created
-
-This approach provides a basic foundation
-for detecting changes in system behavior.
+The project is configured in
+[pyproject.toml](pyproject.toml).
 
 ## Data
 
-The example pipeline reads system metrics from:
+The example uses two datasets from `data/`:
 
-`data/reference_metrics_case.csv`
-`data/current_metrics_case.csv`
+- **Reference data** - measurements representing earlier system behavior.
+- **Current data** - measurements representing a more recent period.
 
-Each row represents one observation of system behavior.
-The pipeline compares the reference and current datasets,
-summarizes average values, and saves the drift results as an artifact.
+Both datasets include:
 
-## Working Files
+- `requests` - number of requests handled.
+- `errors` - number of failed requests.
+- `total_latency_ms` - total response time in milliseconds.
 
-You'll work with just these areas:
+## Approach
 
-- **data/** - it starts with the data
-- **docs/** - tell the story
-- **src/cintel/** - where the magic happens
-- **pyproject.toml** - update authorship & links
-- **zensical.toml** - update authorship & links
+The pipeline uses Polars to:
 
-## Instructions
+1. Calculate summary statistics for both periods.
+2. Calculate differences between reference and current averages.
+3. Compare the differences against drift thresholds.
+4. Record which measurements indicate drift.
 
-Follow the [step-by-step workflow guide](https://denisecase.github.io/pro-analytics-02/workflow-b-apply-example-project/) to complete:
+Explore these project components:
 
-1. Phase 1. **Start & Run**
-2. Phase 2. **Read & Understand**
-3. Phase 3. **Take Ownership**
-4. Phase 4. **Make a Technical Modification**
-5. Phase 5. **Apply the Skills to a New Problem**
+- [pyproject.toml](pyproject.toml) - project configuration and dependencies.
+- [src/cintel/drift_detector.py](src/cintel/drift_detector.py) - drift detection pipeline.
+- [data/](data/) - reference and current measurements.
+- [artifacts/](artifacts/) - generated comparisons.
+- [tests/](tests/) - automated tests.
+- [.github/workflows/](.github/workflows/) - automated checks and documentation deployment.
+- [docs/](docs/) - project documentation.
 
-## Challenges
+## Run the Project
 
-Challenges are expected.
-Sometimes instructions may not quite match your operating system.
-When issues occur, share screenshots, error messages, and details about what you tried.
-Working through issues is part of implementing professional projects.
+Follow the [Professional Python Workflow Guide](https://denisecase.github.io/pro-analytics-02/)
+to set up your machine and project environment.
 
-## Success
+From a VS Code terminal in the project root:
 
-After completing Phase 1. **Start & Run**, you'll have your own GitHub project,
-running on your machine, and running the example will print out:
+```shell
+uv run python -m cintel.drift_detector
+```
+
+## Results
+
+The pipeline produces:
+
+- `artifacts/drift_summary_case.csv` - summary comparisons and drift flags.
+- `artifacts/drift_summary_long_case.csv` - comparison results in a longer format.
+
+Review the differences and drift flags.
+Consider whether the selected thresholds are appropriate
+for the monitored system.
+
+Successful execution produces a terminal message:
 
 ```shell
 ========================
@@ -89,33 +87,44 @@ Pipeline executed successfully!
 ========================
 ```
 
-And a new file named `project.log` will appear in the project folder.
+A `project.log` file is created in the project root.
 
-Once you see it, you're 90% of the way there.
-After that, you'll just make the project yours and get started exploring.
+This confirms that the Python pipeline executes
+and the logging system works.
 
-## Command Reference
+## Verification
 
-The commands below are used in the workflow guide above.
-They are provided here for convenience.
-
-Follow the guide for the **full instructions**.
-
-### Get a Copy of the Project (Once)
-
-Open a **machine terminal** in your `Repos` folder.
-Copy and paste one command and hit Enter or Return afterwards to run it.
+Run the automated tests:
 
 ```shell
-git clone https://github.com/username/cintel-05-drift-detection
-
-cd cintel-05-drift-detection
-code .
+uv run pytest
 ```
 
-See the [workflow guide](https://denisecase.github.io/pro-analytics-02/workflow-b-apply-example-project/) to learn more.
+## Project Documentation
 
-### Initialize or Update the Python Environment
+The [hosted documentation site](https://denisecase.github.io/cintel-05-drift-detection/)
+is published using Zensical and GitHub Pages.
+
+The documentation site is used to present the project report,
+covering such sections as data, methods, results, visualizations,
+interpretation, and conclusions.
+
+## CI/CD and GitHub Actions
+
+This project includes continuous integration and continuous deployment (CI/CD)
+to check project files and publish the docs.
+GitHub Actions include:
+
+- [CI: Python and Documentation Checks](https://github.com/denisecase/cintel-05-drift-detection/actions/workflows/ci-python-zensical.yml)
+- [CD: Documentation Deployment](https://github.com/denisecase/cintel-05-drift-detection/actions/workflows/deploy-zensical.yml)
+
+## Developer Reference
+
+Follow the
+[Professional Python Workflow Guide](https://denisecase.github.io/pro-analytics-02/)
+for **detailed instructions and troubleshooting**.
+
+### Initialize and Update the Python Environment
 
 With the project open in VS Code, open a VS Code terminal.
 Paste each command and hit Enter or Return after to run it.
@@ -133,7 +142,7 @@ uv audit
 ### Set Up and Run Git Hooks
 
 Set up and run the git hooks to perform
-some basic checks automatically before
+basic checks automatically before
 any changes get pushed to GitHub.
 
 In the VS Code terminal,
@@ -148,28 +157,6 @@ uv run prek run --all-files
 # repeat if changes were made
 uv run prek run --all-files
 ```
-
-### Run the Project as Python Module
-
-Run the project code as a Python module.
-
-```shell
-uv run python -m cintel.drift_detector
-```
-
-### Run the Project as Reactive App
-
-Run the project app.py.
-
-```shell
-uv run marimo run app.py
-```
-
-In the terminal, you'll see "Running app.py".
-Click the URL: http://localhost:2718 to open your app.
-
-To stop, click in the VS Code terminal.
-Then hit **CTRL+c** (**CTRL** key and **c** key simultaneously).
 
 ### Run Common Chores
 
@@ -195,7 +182,26 @@ git commit -m "describe your changes in quotes"
 git push -u origin main
 ```
 
-## Notes
+## Developer Notes
 
 - Use the **UP ARROW** and **DOWN ARROW** in the terminal to scroll through past commands.
 - Use `CTRL+f` to find (and replace) text within a file.
+
+## Developer Tools
+
+This project uses professional Python tools to support development,
+testing, documentation, and code quality.
+
+- [uv](https://docs.astral.sh/uv/) - Python environments and dependencies.
+- [Ruff](https://docs.astral.sh/ruff/) - Python linting and formatting, configured in [.ruff.toml](.ruff.toml).
+- [ty](https://docs.astral.sh/ty/) - Python type checking.
+- [pytest](https://docs.pytest.org/) - automated Python testing, configured in [.pytest.toml](.pytest.toml).
+- [prek](https://prek.j178.dev/) - Git hooks and automated checks, configured in [prek.toml](prek.toml).
+- [Zensical](https://zensical.org/) - project documentation, configured in [zensical.toml](zensical.toml).
+
+## Links
+
+- [Hosted Documentation](https://denisecase.github.io/cintel-05-drift-detection/)
+- [Professional Python Workflow Guide](https://denisecase.github.io/pro-analytics-02/)
+- [Citation](CITATION.cff)
+- [License](LICENSE)

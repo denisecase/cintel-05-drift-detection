@@ -1,5 +1,7 @@
-"""
-drift_detector.py - Project script (example).
+"""drift_detector.py - Project script (example).
+
+Author: Your Name Here
+Date: 2026-mm-dd
 
 Reference and Current System Metrics Data
 
@@ -30,18 +32,31 @@ Questions to Consider
 
 Paths (relative to repo root)
 
-    INPUT FILE: data/reference_metrics_case.csv
-    INPUT FILE: data/current_metrics_case.csv
-    OUTPUT FILE: artifacts/drift_summary_case.csv
+    INPUT FILE: data/reference_metrics.csv
+    INPUT FILE: data/current_metrics.csv
+    OUTPUT FILE: artifacts/drift_summary.csv
 
 Terminal command to run this file from the root project folder
 
     uv run python -m cintel.drift_detector
 
-OBS:
-  Don't edit this file - it should remain a working example.
-  Use as much of this code as you can when creating your own pipeline script,
-  and change the comparison logic and thresholds as needed for your project.
+DESIGN:
+
+Use this file to first learn and then apply your skills.
+
+Reusable functions that do the work are kept in a utils file.
+We import functions and pass in what they need through their parentheses.
+Shared utility functions can be imported into a Python
+module or a reactive marimo notebook app.
+
+Reusable visualization functions may come from sources such as eda-vizkit.
+
+SKILLS:
+
+- Reading CSV files into Polars DataFrames.
+- Defining and using constants for thresholds.
+- Logging for debugging and transparency.
+- Comparing reference and current datasets to detect drift.
 """
 
 # === DECLARE IMPORTS ===
@@ -53,6 +68,8 @@ from typing import Final
 from datafun_toolkit.logger import get_logger, log_header, log_path
 import polars as pl
 
+from cintel.utils_system import compute_drift_summary, load_system_metrics
+
 # === CONFIGURE LOGGER ===
 
 LOG: logging.Logger = get_logger("P5", level="DEBUG")
@@ -63,11 +80,11 @@ ROOT_DIR: Final[Path] = Path.cwd()
 DATA_DIR: Final[Path] = ROOT_DIR / "data"
 ARTIFACTS_DIR: Final[Path] = ROOT_DIR / "artifacts"
 
-REFERENCE_FILE: Final[Path] = DATA_DIR / "reference_metrics_case.csv"
-CURRENT_FILE: Final[Path] = DATA_DIR / "current_metrics_case.csv"
+REFERENCE_FILE: Final[Path] = DATA_DIR / "reference_metrics.csv"
+CURRENT_FILE: Final[Path] = DATA_DIR / "current_metrics.csv"
 
-OUTPUT_FILE: Final[Path] = ARTIFACTS_DIR / "drift_summary_case.csv"
-SUMMARY_LONG_FILE: Final[Path] = ARTIFACTS_DIR / "drift_summary_long_case.csv"
+OUTPUT_FILE: Final[Path] = ARTIFACTS_DIR / "drift_summary.csv"
+SUMMARY_LONG_FILE: Final[Path] = ARTIFACTS_DIR / "drift_summary_long.csv"
 
 # === DEFINE THRESHOLDS ===
 
@@ -111,140 +128,38 @@ def main() -> None:
     # ----------------------------------------------------
     # STEP 1: READ REFERENCE AND CURRENT CSV INTO DATAFRAMES
     # ----------------------------------------------------
-    reference_df = pl.read_csv(REFERENCE_FILE)
-    current_df = pl.read_csv(CURRENT_FILE)
+    # load_system_metrics() wraps polars' read_csv() — see utils_system.py.
+    # Both files share the same schema (requests, errors, total_latency_ms),
+    # so the same loader works for both periods.
+    reference_df: pl.DataFrame = load_system_metrics(REFERENCE_FILE)
+    current_df: pl.DataFrame = load_system_metrics(CURRENT_FILE)
 
     LOG.info(f"Loaded {reference_df.height} reference records")
     LOG.info(f"Loaded {current_df.height} current records")
 
     # ----------------------------------------------------
-    # STEP 2: CALCULATE AVERAGE METRICS FOR EACH PERIOD
+    # STEP 2: SUMMARIZE EACH PERIOD, COMPARE, AND FLAG DRIFT
     # ----------------------------------------------------
-    # Summarize each dataset using average values so we can
-    # compare earlier system behavior to current system behavior.
-    # We can create the summary tables by calculating the mean of each metric column
-    # and providing a name for each new column that indicates
-    # whether it is a reference or current value and what metric it holds.
+    # compute_drift_summary() does the full comparison in one call:
+    # averages each period, combines them into one row, computes the
+    # difference of means, and flags drift where |difference| exceeds
+    # the given threshold — see utils_system.py for exactly how.
+    LOG.info(f"REQUESTS_DRIFT_THRESHOLD: {REQUESTS_DRIFT_THRESHOLD}")
+    LOG.info(f"ERRORS_DRIFT_THRESHOLD: {ERRORS_DRIFT_THRESHOLD}")
+    LOG.info(f"LATENCY_DRIFT_THRESHOLD: {LATENCY_DRIFT_THRESHOLD}")
 
-    reference_summary_df = reference_df.select(
-        [
-            pl.col("requests").mean().alias("reference_avg_requests"),
-            pl.col("errors").mean().alias("reference_avg_errors"),
-            pl.col("total_latency_ms").mean().alias("reference_avg_latency_ms"),
-        ]
-    )
-
-    current_summary_df = current_df.select(
-        [
-            pl.col("requests").mean().alias("current_avg_requests"),
-            pl.col("errors").mean().alias("current_avg_errors"),
-            pl.col("total_latency_ms").mean().alias("current_avg_latency_ms"),
-        ]
-    )
-
-    # ----------------------------------------------------
-    # STEP 3: COMBINE THE TWO ONE-ROW SUMMARY TABLES
-    # ----------------------------------------------------
-    # Each summary table has one row.
-    #
-    # reference_summary_df:
-    #   reference_avg_requests
-    #   reference_avg_errors
-    #   reference_avg_latency_ms
-    #
-    # current_summary_df:
-    #   current_avg_requests
-    #   current_avg_errors
-    #   current_avg_latency_ms
-    #
-    # We combine them horizontally so both sets of values
-    # appear side-by-side in a single row using the
-    # concatenate function (pl.concat).
-    #
-    # This makes it easy to calculate:
-    #   current value - reference value
-
-    combined_df: pl.DataFrame = pl.concat(
-        [reference_summary_df, current_summary_df],
-        how="horizontal",
-    )
-
-    # ----------------------------------------------------
-    # STEP 4: DEFINE DIFFERENCE RECIPES
-    # ----------------------------------------------------
-    # A difference recipe calculates:
-    #
-    #     current average - reference average
-    #
-    # Positive values mean the current period is larger.
-    # Negative values mean the current period is smaller.
-
-    requests_mean_difference_recipe: pl.Expr = (
-        (pl.col("current_avg_requests") - pl.col("reference_avg_requests"))
-        .round(2)
-        .alias("requests_mean_difference")
-    )
-
-    errors_mean_difference_recipe: pl.Expr = (
-        (pl.col("current_avg_errors") - pl.col("reference_avg_errors"))
-        .round(2)
-        .alias("errors_mean_difference")
-    )
-
-    latency_mean_difference_recipe: pl.Expr = (
-        (pl.col("current_avg_latency_ms") - pl.col("reference_avg_latency_ms"))
-        .round(2)
-        .alias("latency_mean_difference_ms")
-    )
-
-    # ----------------------------------------------------
-    # STEP 4.1: APPLY THE DIFFERENCE RECIPES TO EXPAND THE DATAFRAME
-    # ----------------------------------------------------
-    drift_df: pl.DataFrame = combined_df.with_columns(
-        [
-            requests_mean_difference_recipe,
-            errors_mean_difference_recipe,
-            latency_mean_difference_recipe,
-        ]
-    )
-
-    # ----------------------------------------------------
-    # STEP 5: DEFINE DRIFT FLAG RECIPES
-    # ----------------------------------------------------
-    # A drift flag recipe checks whether the absolute size
-    # of the difference exceeds a threshold.
-    #
-    # We use abs() because either direction may matter:
-    # - much higher than reference
-    # - much lower than reference
-
-    requests_is_drifting_flag_recipe: pl.Expr = (
-        pl.col("requests_mean_difference").abs() > REQUESTS_DRIFT_THRESHOLD
-    ).alias("requests_is_drifting_flag")
-
-    errors_is_drifting_flag_recipe: pl.Expr = (
-        pl.col("errors_mean_difference").abs() > ERRORS_DRIFT_THRESHOLD
-    ).alias("errors_is_drifting_flag")
-
-    latency_is_drifting_flag_recipe: pl.Expr = (
-        pl.col("latency_mean_difference_ms").abs() > LATENCY_DRIFT_THRESHOLD
-    ).alias("latency_is_drifting_flag")
-
-    # ----------------------------------------------------
-    # STEP 5.1: APPLY THE DRIFT FLAG RECIPES TO EXPAND THE DATAFRAME
-    # ----------------------------------------------------
-    drift_df = drift_df.with_columns(
-        [
-            requests_is_drifting_flag_recipe,
-            errors_is_drifting_flag_recipe,
-            latency_is_drifting_flag_recipe,
-        ]
+    drift_df: pl.DataFrame = compute_drift_summary(
+        reference_df,
+        current_df,
+        requests_threshold=REQUESTS_DRIFT_THRESHOLD,
+        errors_threshold=ERRORS_DRIFT_THRESHOLD,
+        latency_threshold=LATENCY_DRIFT_THRESHOLD,
     )
 
     LOG.info("Calculated summary differences and drift flags")
 
     # ----------------------------------------------------
-    # STEP 6: SAVE THE FLAT DRIFT SUMMARY AS AN ARTIFACT
+    # STEP 3: SAVE THE FLAT DRIFT SUMMARY AS AN ARTIFACT
     # ----------------------------------------------------
     drift_df.write_csv(OUTPUT_FILE)
     LOG.info(f"Wrote drift summary file: {OUTPUT_FILE}")
@@ -257,7 +172,7 @@ def main() -> None:
     LOG.info("All remaining steps are about creating a nicer display.")
 
     # ----------------------------------------------------
-    # OPTIONAL STEP 6.1: LOG THE SUMMARY ONE FIELD PER LINE
+    # OPTIONAL STEP 3.1: LOG THE SUMMARY ONE FIELD PER LINE
     # ----------------------------------------------------
     # drift_df has one row with many columns.
     # Convert that one row to a dictionary so we can log:
@@ -282,7 +197,7 @@ def main() -> None:
         LOG.info(f"{field_name}: {field_value}")
 
     # ----------------------------------------------------
-    # OPTIONAL STEP 7: CREATE A LONG-FORM ARTIFACT FOR DISPLAY
+    # OPTIONAL STEP 4: CREATE A LONG-FORM ARTIFACT FOR DISPLAY
     # ----------------------------------------------------
     # Create a second artifact with one field per row.
     # This is easier to read than a single very wide row.
@@ -297,7 +212,7 @@ def main() -> None:
         }
     )
     # ----------------------------------------------------
-    # OPTIONAL STEP 7.1: SAVE THE LONG-FORM DRIFT SUMMARY AS AN ARTIFACT
+    # OPTIONAL STEP 4.1: SAVE THE LONG-FORM DRIFT SUMMARY AS AN ARTIFACT
     # ----------------------------------------------------
     drift_summary_long_df.write_csv(SUMMARY_LONG_FILE)
     LOG.info(f"Wrote long summary file: {SUMMARY_LONG_FILE}")

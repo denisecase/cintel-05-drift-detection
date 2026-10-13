@@ -11,9 +11,8 @@ RUN LOCALLY:
 WASM DEPENDENCIES:
 
 Under WebAssembly (emscripten) the browser has no project environment.
-This app uses only marimo, which is already present in the marimo WASM
-runtime. If a later version adds third-party packages, the first cell
-installs them with micropip when running under WASM.
+This app uses polars in addition to marimo, so the first cell installs
+polars with micropip when running under WASM.
 
 NO LOGGING:
 
@@ -22,43 +21,18 @@ so this notebook configures no logging.
 
 PLAN CELLS FIRST
 
-1. Imports (returns shared imports and constants)
+1. Imports (installs WASM deps, returns shared imports and constants)
 2. Opening title and introduction (Markdown)
-3. Closing (Markdown)
+3. Load reference and current data (same cell handles local and WASM
+   environments, via cintel.utils_system)
+4. Threshold controls (sliders)
+5. Compute drift summary (same logic as the CLI pipeline)
+6. Show the results (summary table + per-metric drift flags)
+7. Closing (Markdown)
 
 Note: marimo triggers @app.cell functions automatically; we never call them.
 The names starting with "_" are for our own organization; the engine ignores
 them.
-
-HOW MARIMO NOTEBOOKS WORK
-
-Each cell is a FUNCTION.
-The return value of one cell can be passed as an argument to another cell.
-We never call the functions, so they don't need names other than `_` (underscore).
-(You can give them names if you want, but the notebook engine ignores them.)
-
-The notebook is REACTIVE: when a cell's code or inputs change,
-the notebook engine reruns that cell and every cell that depends on it.
-
-The notebook is always CONSISTENT with outputs reflecting current inputs.
-
-The first cell imports all dependencies, so the notebook is SELF-CONTAINED.
-
-All later cells include their dependencies in their argument list.
-Some other cells return values that can be used in other cells.
-A cell displays the value of its last expression.
-
-A cell whose last line is an assignment or a bare return
-(like data and view cells) displays nothing;
-only markdown, control, and render cells are meant to show.
-
-RULE: Each variable must be defined in exactly one cell.
-Defining the same name in two cells is a marimo error.
-
-INPUT WIDGETS/CONTROLS: A cell that builds an input widget
-resets that widget to its default every time the cell reruns.
-marimo reruns a cell whenever any argument in its signature changes.
-So a widget-building cell must depend only on what genuinely determines its options.
 """
 
 # === ONLY THIS AT THE TOP OF THE FILE ===
@@ -66,40 +40,174 @@ So a widget-building cell must depend only on what genuinely determines its opti
 import marimo
 
 __generated_with = "0.25.0"
+
 app = marimo.App(width="medium")
 
 # === FIRST CELL IMPORTS AND RETURNS DEPENDENCIES TO MAKE IT SELF-CONTAINED ===
 
 
 @app.cell
-def _():
+async def _():
+    import sys
+
+    if sys.platform == "emscripten":
+        import micropip
+
+        await micropip.install("polars")
+
     import marimo as mo
+    import polars as pl
 
-    return (mo,)
+    from cintel.utils_system import compute_drift_summary, load_system_metrics
+
+    return compute_drift_summary, load_system_metrics, mo, pl, sys
 
 
-# ===  TYPICALLY START WITH A MARKDOWN TITLE AND OPENING ===
+# === TITLE AND INTRODUCTION ===
 
 
 @app.cell
 def _(mo):
     mo.md(r"""
-    # I Can Build Web Apps with Marimo!
+    # Drift Detection
 
-    Add your special message here:
+    Compares average system behavior between a **reference** period and a
+    **current** period, and flags a metric as drifting when the difference
+    exceeds the threshold you set.
+
+    Move the sliders below to see how sensitive drift detection becomes.
     """)
 
 
-# ===  TYPICALLY END WITH A MARKDOWN SOURCE LINK AND CLOSING ===
+# === LOAD REFERENCE AND CURRENT DATA ===
+
+
+@app.cell
+def _(load_system_metrics, mo, sys):
+    """Load reference and current data. Two environments, one cell.
+
+    Locally, polars reads both CSVs from data/.
+    Under WASM (emscripten), Pyodide's open_url() fetches both CSVs from
+    public/ and load_system_metrics() reads them from there instead.
+    """
+    notebook_location = mo.notebook_location()
+
+    if notebook_location is None:
+        raise RuntimeError("Unable to determine notebook location.")
+
+    reference_filename = "reference_metrics.csv"
+    current_filename = "current_metrics.csv"
+
+    if sys.platform == "emscripten":
+        from pyodide.http import open_url  # ty: ignore[unresolved-import]
+
+        reference_url = notebook_location / "public" / reference_filename
+        current_url = notebook_location / "public" / current_filename
+        reference_df = load_system_metrics(open_url(str(reference_url)))
+        current_df = load_system_metrics(open_url(str(current_url)))
+    else:
+        data_dir = notebook_location.parents[1] / "data"
+        reference_df = load_system_metrics(data_dir / reference_filename)
+        current_df = load_system_metrics(data_dir / current_filename)
+
+    return current_df, reference_df
+
+
+# === THRESHOLD CONTROLS ===
+
+# NOTE: This example uses fixed threshold values.
+# The sliders' min/max/default are not dependent on the data,
+# so it's safe to build all three in one cell
+# (see the imports-cell WASM note above for the general marimo
+# rule this follows).
+#
+# If you improve this to use DATA-DRIVEN thresholds instead,
+# e.g. threshold =
+# reference_df["requests"].mean() + 2 * reference_df["requests"].std()
+# you would need to give that slider its OWN cell, with reference_df
+# in its arguments.
+#
+# WHY: a cell reruns
+# (and resets every widget it builds back to default)
+# whenever ANY of its listed arguments change.
+
+# If a data-driven slider shares a cell with fixed ones,
+# the fixed sliders are forced to depend on reference_df too
+# (just by being in the same cell).
+# So they'd get silently reset to default any time the
+# reference data changes,
+# even though they never needed to depend on it at all.
+#
+# One cell per data-driven slider will keep each slider's reset
+# behavior scoped to only what it truly needs.
+
+
+@app.cell
+def _(mo):
+    requests_threshold = mo.ui.slider(
+        0, 100, value=20, label="Requests drift threshold"
+    )
+    errors_threshold = mo.ui.slider(0, 10, value=2, label="Errors drift threshold")
+    latency_threshold = mo.ui.slider(
+        0, 3000, value=1000, step=100, label="Latency drift threshold (ms)"
+    )
+    mo.vstack([requests_threshold, errors_threshold, latency_threshold])
+    return errors_threshold, latency_threshold, requests_threshold
+
+
+# === COMPUTE DRIFT SUMMARY (SAME LOGIC AS THE CLI PIPELINE) ===
+
+
+@app.cell
+def _(
+    compute_drift_summary,
+    current_df,
+    errors_threshold,
+    latency_threshold,
+    reference_df,
+    requests_threshold,
+):
+    drift_df = compute_drift_summary(
+        reference_df,
+        current_df,
+        requests_threshold=requests_threshold.value,
+        errors_threshold=errors_threshold.value,
+        latency_threshold=latency_threshold.value,
+    )
+    return (drift_df,)
+
+
+# === SHOW THE RESULTS ===
+
+
+@app.cell
+def _(drift_df, mo):
+    drift_summary_dict = drift_df.to_dicts()[0]
+    flagged = [
+        name.replace("_is_drifting_flag", "")
+        for name, value in drift_summary_dict.items()
+        if name.endswith("_is_drifting_flag") and value
+    ]
+    if flagged:
+        message = f"**Drifting:** {', '.join(flagged)}"
+    else:
+        message = "**No metrics are drifting** at these thresholds."
+    mo.md(message)
+
+
+@app.cell
+def _(drift_df, mo):
+    mo.ui.table(drift_df)
+
+
+# === TYPICALLY END WITH A MARKDOWN SOURCE LINK AND CLOSING ===
 
 
 @app.cell
 def _(mo):
     mo.md(r"""
     ---
-
     [😊 Learn more at marimo.io](https://marimo.io/)
-
     ---
 
     **Running locally?**
@@ -107,7 +215,6 @@ def _(mo):
     then press **CTRL** and **c** together (CTRL+c).
     When it asks "Are you sure you want to quit? (y/N)",
     type **y** and press **Enter**.
-
     ---
     """)
 

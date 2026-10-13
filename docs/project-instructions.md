@@ -1,124 +1,108 @@
 # Project Instructions
 
-## WEDNESDAY: Complete Workflow Phase 1-3
+## Goal
 
-Follow the instructions in
-[⭐ **Workflow: Apply Example**](https://denisecase.github.io/pro-analytics-02/workflow-b-apply-example-project/).
+Apply **baseline comparison and drift detection**
+to investigate changes in system behavior.
 
-Complete:
+## A. Set Up Machine
 
-1. Phase 1. **Start & Run**
-2. Phase 2. **Read & Understand**
-3. Phase 3. **Take Ownership**
+Complete [Workflow A: Set Up Machine](https://denisecase.github.io/pro-analytics-02/workflow-a-set-up-machine/)
+if your machine is not ready.
 
-## FRIDAY/SUNDAY: Complete Workflow Phases 4-5
+## B. Explore Example Project
 
-Complete:
+Follow [Workflow B: Explore Example Project](https://denisecase.github.io/pro-analytics-02/workflow-b-explore-example-project/).
 
-1. Phase 4. **Make a Technical Modification**
-2. Phase 5. **Apply the Skills to a New Problem**
+Explore how the example:
 
-## Topic
+- Reads reference and current datasets.
+- Calculates summary statistics for each period.
+- Computes differences between corresponding means.
+- Applies thresholds to produce drift flags.
+- Saves the comparisons as artifacts.
 
-Drift detection for monitoring changes in system behavior.
+Consider how the selected metrics and thresholds
+affect the interpretation of system change.
 
-In this project, you compare **recent system behavior** with a **baseline reference period** to determine whether the system has changed.
+## C. Start New Project
 
-Drift detection helps analysts determine when a system is behaving differently than expected.
+Follow [Workflow C: Start New Project](https://denisecase.github.io/pro-analytics-02/workflow-c-start-new-project/).
 
-## Learning Objectives
+IMPORTANT: New repository name:
+**cintel-05-drift-detection**.
 
-After completing this project, you should be able to:
+VERIFY: You have completed git add-commit-push to GitHub at least twice.
 
-- Explain what drift means in a monitoring system
-- Compare current observations to a reference baseline
-- Detect when system metrics shift away from normal behavior
-- Run and validate a professional Python project
-- Interpret evidence that suggests system behavior has changed
+## D. Apply Skills
 
-## Example Code
+Follow [Workflow D: Apply Skills](https://denisecase.github.io/pro-analytics-02/workflow-d-apply-skills/).
 
-The example file is located in:
+**Your problem:** Determine whether an increase
+in errors reflects increased workload
+or a change in service reliability.
 
-```text
-src/cintel/drift_detector_case.py
-```
+You may use the example reference and current datasets
+or choose two comparable datasets from another scenario.
 
-It demonstrates:
+### Progression 1. Your Project Works Like the Example
 
-- reading a **reference dataset** representing baseline behavior
-- reading a **current dataset** representing recent observations
-- computing summary statistics for both periods
-- comparing the two periods to detect drift
-- writing results to an artifacts file
-- logging the pipeline process
+Ensure your new custom project runs like the example.
 
-Run the example and review the code before creating your own version.
+Verify that key files have been updated to use **your GitHub account** and
+the **new custom repository name**.
 
-## Dataset
+### Progression 2. Make a Technical Modification
 
-The example datasets are located in the `data/` folder.
+Change one drift threshold.
 
-Typical files include:
+Run the pipeline again and observe whether
+the corresponding drift flag changes.
 
-- `reference_metrics_case.csv`
-- `current_metrics_case.csv`
+Explain the effect of your modification.
 
-The **reference dataset** represents normal system behavior.
+### Progression 3. Apply to a New Problem
 
-The **current dataset** represents more recent system activity.
+Investigate changes in service reliability,
+not just changes in raw activity counts.
 
-Drift detection compares these two periods to determine whether the system has changed.
+- Calculate error rates for both periods.
+- Compare reference and current error rates.
+- Choose and explain a meaningful comparison threshold.
+- Identify changes that may warrant investigation.
+- Save the comparison results as artifacts.
+- Interpret the findings.
 
-## Your Phase 4: Technical Modification Task
+Distinguish observed differences from evidence
+of meaningful or persistent drift.
 
-Using the example as a guide:
+## E. Finalize Project
 
-1. Copy `src/cintel/drift_detector_case.py`.
-2. Rename the copy to `src/cintel/drift_detector_yourname.py`.
-3. Run your copied file to confirm it executes correctly.
-4. Modify the program by changing how drift is evaluated.
+Follow [Workflow E: Finalize Project](https://denisecase.github.io/pro-analytics-02/workflow-e-finalize/).
 
-Possible modifications include:
+Use `docs/index.md` to report:
 
-- adjusting the drift threshold
-- comparing additional metrics
-- changing the summary statistic used for comparison
-- adding additional logging or output columns
+- Reference and current datasets.
+- Comparison metrics and thresholds.
+- Technical modifications.
+- Differences and drift indicators.
+- A visual comparing the periods.
+- Interpretation, limitations, and possible actions.
 
-Then:
+Include a clickable link to your repository and artifacts.
 
-- run the project
-- confirm the drift results appear in the output artifact
-- confirm the program logs useful messages
+## Success
 
-The goal of this phase is to practice modifying a working drift detection pipeline.
-
-## Phase 5: Apply the Skills
-
-In Phase 5 you apply drift detection to a new situation.
-
-Possible approaches include:
-
-- comparing two different time periods in a dataset
-- detecting drift in website traffic or system performance
-- evaluating whether error rates or latency have shifted
-- monitoring changes in operational metrics
-
-Update your documentation in `docs/` to explain:
-
-- what datasets you compared
-- what drift indicators you used
-- what changes you observed
-- what those changes might mean for the system
-
-**Drift detection** is an important component of **continuous intelligence**,
-helping analysts identify when system behavior begins to change.
-
-If you would like to apply these skills to a real dataset instead of the provided example data, see suggested datasets:
-
-https://denisecase.github.io/pro-analytics-02/reference/datasets/cintel/
+- [ ] README.md project-specific links use **your GitHub account**
+- [ ] README.md project-specific links use **your custom repository name**.
+- [ ] docs/index.md project-specific links use **your GitHub account**
+- [ ] docs/index.md project-specific links use **your custom repository name**.
+- [ ] pyproject.toml `name` has been changed to use **your custom repository name**.
+- [ ] The `src/cintel` folder reflects your authorship and custom work.
+- [ ] All necessary commands are provided and work successfully.
+- [ ] Links to the Professional Python Guide (pro-analytics-02) remain unchanged.
+- [ ] Commit history shows **at least** the git add-commit-push history required in the instructions.
 
 ---
 
-[◄ Back to 🏠 Home](index.md)
+[◄ Back to Home](index.md)
