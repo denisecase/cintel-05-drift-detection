@@ -20,9 +20,9 @@ Two datasets represent different observation periods:
 Each contains measurements of requests,
 errors, and total latency.
 
-[View Reference Data](https://github.com/denisecase/cintel-05-drift-detection/blob/main/data/reference_metrics_case.csv)
+[View Reference Data](https://github.com/denisecase/cintel-05-drift-detection/blob/main/data/reference_metrics.csv)
 
-[View Current Data](https://github.com/denisecase/cintel-05-drift-detection/blob/main/data/current_metrics_case.csv)
+[View Current Data](https://github.com/denisecase/cintel-05-drift-detection/blob/main/data/current_metrics.csv)
 
 ## Methods
 
@@ -55,9 +55,9 @@ be justified for a production monitoring system.
 
 **All three metrics exceeded their configured thresholds.**
 
-[View Drift Results](https://github.com/denisecase/cintel-05-drift-detection/blob/main/artifacts/drift_summary_case.csv)
+[View Drift Results](https://github.com/denisecase/cintel-05-drift-detection/blob/main/artifacts/drift_summary.csv)
 
-[View Detailed Summary](https://github.com/denisecase/cintel-05-drift-detection/blob/main/artifacts/drift_summary_long_case.csv)
+[View Detailed Summary](https://github.com/denisecase/cintel-05-drift-detection/blob/main/artifacts/drift_summary_long.csv)
 
 ## Interpretation
 

@@ -72,8 +72,8 @@ uv run python -m cintel.drift_detector
 
 The pipeline produces:
 
-- `artifacts/drift_summary_case.csv` - summary comparisons and drift flags.
-- `artifacts/drift_summary_long_case.csv` - comparison results in a longer format.
+- `artifacts/drift_summary.csv` - summary comparisons and drift flags.
+- `artifacts/drift_summary_long.csv` - comparison results in a longer format.
 
 Review the differences and drift flags.
 Consider whether the selected thresholds are appropriate

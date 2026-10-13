@@ -30,7 +30,7 @@ affect the interpretation of system change.
 Follow [Workflow C: Start New Project](https://denisecase.github.io/pro-analytics-02/workflow-c-start-new-project/).
 
 IMPORTANT: New repository name:
-**cintel-05-drift-detection**.
+**cintel-05-drift-detection-custom**.
 
 VERIFY: You have completed git add-commit-push to GitHub at least twice.
 
