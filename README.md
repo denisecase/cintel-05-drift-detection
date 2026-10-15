@@ -83,6 +83,7 @@ The pipeline produces:
 
 - `artifacts/drift_summary.csv` - summary comparisons and drift flags.
 - `artifacts/drift_summary_long.csv` - comparison results in a longer format.
+- `artifacts/drift_stats.csv` - statistical comparison of error rates
 
 Review the differences and drift flags.
 Consider whether the selected thresholds are appropriate
